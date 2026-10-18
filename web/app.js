@@ -518,7 +518,7 @@ async function generatePdfInBrowser(data) {
   drawCells(page1, data.confirm_last_name, 14.17, 588.56);
   drawCells(page1, data.confirm_first_name, 14.17, 611.26);
   drawCells(page1, data.confirm_middle_name, 14.17, 633.96);
-  if (data.doc_date) drawDate(page1, data.doc_date, 155.90, 674.36);
+  if (data.doc_date) drawDate(page1, data.doc_date, 161.29, 674.36);
   drawCells(page1, "002", 127.55, 704.16);
 
   // Заполнение стр. 2

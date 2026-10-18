@@ -326,7 +326,7 @@ def generate_pdf(data: Union[SpravkaData, Dict[str, Any]], template_path: str = 
 
     # Дата справки (стр. 1 в клетки)
     if spravka.doc_date:
-        _draw_date_cells(c1, spravka.doc_date, 155.90, 156.53, font_name)
+        _draw_date_cells(c1, spravka.doc_date, 161.29, 156.53, font_name)
 
     # Количество страниц
     _draw_cell_text(c1, f"{pages_count:03d}", 127.55, 126.73, font_name)
