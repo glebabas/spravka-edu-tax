@@ -1,24 +1,46 @@
 @echo off
-chcp 65001 >nul
-title SpravkaEduTax — Генератор справок КНД 1151158
+title SpravkaEduTax
 
 echo =====================================================================
-echo  Запуск Генератора справок об оплате образовательных услуг (КНД 1151158)
+echo  SpravkaEduTax - Zapusk prilozheniya
 echo =====================================================================
 echo.
 
-python --version >nul 2>&1
-if errorlevel 1 (
-    echo [ОШИБКА] Python не найден! Установите Python 3.10+ с сайта python.org
-    pause
-    exit /b 1
+set PY_EXE=
+
+if exist "%LOCALAPPDATA%\Programs\Python\Python312\python.exe" (
+    set "PY_EXE=%LOCALAPPDATA%\Programs\Python\Python312\python.exe"
+    goto found_python
 )
 
-echo [1/2] Проверка зависимостей...
-pip install -r requirements.txt --quiet
+if exist "%LOCALAPPDATA%\Programs\Python\Python311\python.exe" (
+    set "PY_EXE=%LOCALAPPDATA%\Programs\Python\Python311\python.exe"
+    goto found_python
+)
 
-echo [2/2] Запуск веб-приложения...
+py --version >nul 2>&1
+if %errorlevel% equ 0 (
+    set "PY_EXE=py"
+    goto found_python
+)
+
+python --version >nul 2>&1
+if %errorlevel% equ 0 (
+    set "PY_EXE=python"
+    goto found_python
+)
+
+echo [ERROR] Python not found on your PC!
+echo Please install Python 3.10+ from python.org
+pause
+exit /b 1
+
+:found_python
+echo [1/2] Proverka bibliotek pypdf, reportlab, openpyxl...
+"%PY_EXE%" -m pip install -r requirements.txt --quiet
+
+echo [2/2] Zapusk servera prilozheniya...
 echo.
-python app.py
+"%PY_EXE%" app.py
 
 pause
