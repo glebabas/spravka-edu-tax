@@ -1,0 +1,20 @@
+{
+  "profile_name": "Новая организация / Чистый шаблон",
+  "org_inn": "",
+  "org_kpp": "",
+  "org_name_lines": [
+    "",
+    "",
+    "",
+    ""
+  ],
+  "full_time": 0,
+  "confirm_last_name": "",
+  "confirm_first_name": "",
+  "confirm_middle_name": "",
+  "signature_path": "",
+  "default_doc_code": "21",
+  "default_year": 2026,
+  "last_number": 0,
+  "has_page_2": true
+}

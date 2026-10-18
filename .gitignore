@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# PDF outputs (don't commit generated certificates with personal data)
+output/*.pdf
+!output/.gitkeep
+tests/test_output/
+
+# User personal data files
+*справка.pdf
+!example.pdf
+!assets/example.pdf
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

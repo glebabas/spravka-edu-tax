@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Генератор справок об оплате образовательных услуг (КНД 1151158)</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20width=%2232%22%20height=%2232%22><text y=%2224%22 font-size=%2224%22>📑</text></svg>">
+  <script src="pdf-lib.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Шапка приложения -->
+    <header class="app-header">
+      <div class="header-branding">
+        <div class="logo-icon">📑</div>
+        <div>
+          <h1>Справка об оплате образовательных услуг</h1>
+          <p class="subtitle">Форма по КНД 1151158 • Для социального налогового вычета НДФЛ</p>
+        </div>
+      </div>
+      <div class="header-profile">
+        <label for="profileSelect">Профиль:</label>
+        <select id="profileSelect" class="profile-select">
+          <option value="burlakov">ИП Бурлаков Н. С. (По умолчанию)</option>
+          <option value="clean">Чистый шаблон (Для GitHub)</option>
+          <option value="custom">Пользовательский...</option>
+        </select>
+        <span class="badge" id="statusBadge">Готов к работе</span>
+      </div>
+    </header>
+
+    <!-- Навигационные вкладки -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="single"><span class="icon">📄</span> Одиночная справка</button>
+      <button class="tab-btn" data-tab="batch"><span class="icon">📊</span> Пакетная генерация (Excel / CSV)</button>
+      <button class="tab-btn" data-tab="settings"><span class="icon">⚙️</span> Статические данные организации</button>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+      <!-- ВКЛАДКА 1: ОДИНОЧНАЯ СПРАВКА -->
+      <section id="tab-single" class="tab-pane active">
+        <div class="two-column-layout">
+          <!-- Левая колонка: Форма ввода -->
+          <div class="form-column">
+            <form id="spravkaForm" autocomplete="off">
+              <!-- Блок: Реквизиты документа -->
+              <div class="card">
+                <div class="card-header">
+                  <span class="card-icon">🔢</span>
+                  <h3>Реквизиты справки</h3>
+                </div>
+                <div class="form-grid grid-4">
+                  <div class="form-group">
+                    <label for="docNumber">Номер справки</label>
+                    <div class="input-with-action">
+                      <input type="text" id="docNumber" name="doc_number" value="035" maxlength="15" placeholder="035" required>
+                      <button type="button" id="btnNextNumber" title="Следующий номер" class="btn-icon">＋1</button>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="correctionNum">Корректировка</label>
+                    <input type="number" id="correctionNum" name="correction_num" value="0" min="0" max="99">
+                  </div>
+                  <div class="form-group">
+                    <label for="docYear">Отчетный год</label>
+                    <input type="number" id="docYear" name="year" value="2025" min="2020" max="2035" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="docDate">Дата справки</label>
+                    <input type="text" id="docDate" name="doc_date" value="01.07.2026" placeholder="ДД.ММ.ГГГГ" required>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Блок: Данные налогоплательщика -->
+              <div class="card">
+                <div class="card-header">
+                  <span class="card-icon">👤</span>
+                  <h3>Данные налогоплательщика (плательщика)</h3>
+                </div>
+                <div class="form-grid grid-3">
+                  <div class="form-group">
+                    <label for="payerLastName">Фамилия <span class="req">*</span></label>
+                    <input type="text" id="payerLastName" name="payer_last_name" class="uppercase-input" placeholder="ИВАНОВ" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="payerFirstName">Имя <span class="req">*</span></label>
+                    <input type="text" id="payerFirstName" name="payer_first_name" class="uppercase-input" placeholder="ИВАН" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="payerMiddleName">Отчество</label>
+                    <input type="text" id="payerMiddleName" name="payer_middle_name" class="uppercase-input" placeholder="ИВАНОВИЧ">
+                  </div>
+                </div>
+                <div class="form-grid grid-2 mt-2">
+                  <div class="form-group">
+                    <label for="payerBirthDate">Дата рождения <span class="req">*</span></label>
+                    <input type="text" id="payerBirthDate" name="payer_birth_date" placeholder="15.05.1985" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="payerInn">ИНН плательщика (при наличии)</label>
+                    <input type="text" id="payerInn" name="payer_inn" maxlength="12" placeholder="12 цифр">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Блок: Документ, удостоверяющий личность -->
+              <div class="card">
+                <div class="card-header">
+                  <span class="card-icon">🪪</span>
+                  <h3>Документ, удостоверяющий личность</h3>
+                </div>
+                <div class="form-grid grid-3">
+                  <div class="form-group">
+                    <label for="docCode">Вид документа</label>
+                    <select id="docCode" name="doc_code">
+                      <option value="21" selected>21 — Паспорт гражданина РФ</option>
+                      <option value="10">10 — Иностранный паспорт</option>
+                      <option value="03">03 — Свидетельство о рождении</option>
+                      <option value="12">12 — Вид на жительство РФ</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="docPassport">Серия и номер <span class="req">*</span></label>
+                    <input type="text" id="docPassport" name="passport" placeholder="4508 123456" maxlength="11" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="docIssueDate">Дата выдачи <span class="req">*</span></label>
+                    <input type="text" id="docIssueDate" name="doc_issue_date" placeholder="20.06.2005" required>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Блок: Сумма расходов -->
+              <div class="card highlight-card">
+                <div class="card-header">
+                  <span class="card-icon">💰</span>
+                  <h3>Сумма расходов на образовательные услуги</h3>
+                </div>
+                <div class="form-grid grid-2">
+                  <div class="form-group">
+                    <label for="amountRub">Сумма в рублях <span class="req">*</span></label>
+                    <input type="text" id="amountRub" name="amount_rub" class="amount-input" placeholder="120 000" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="amountKop">Копейки</label>
+                    <input type="number" id="amountKop" name="amount_kop" value="0" min="0" max="99">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Блок: Обучаемый (Стр. 2) -->
+              <div class="card">
+                <div class="card-header space-between">
+                  <div class="header-left">
+                    <span class="card-icon">🎓</span>
+                    <h3>Сведения об обучаемом</h3>
+                  </div>
+                  <label class="switch-label">
+                    <input type="checkbox" id="isSamePerson" name="is_same_person" value="1" checked>
+                    <span class="switch-slider"></span>
+                    <span class="switch-text">Обучаемый и плательщик — одно лицо</span>
+                  </label>
+                </div>
+
+                <!-- Раскрывающийся блок, если обучаемый — другое лицо -->
+                <div id="studentDetailsBlock" class="student-details hidden">
+                  <div class="alert-info">
+                    ℹ️ Заполняется на странице 2 справки, если обучение оплачивал родитель/супруг за другого человека.
+                  </div>
+                  <div class="form-grid grid-3 mt-2">
+                    <div class="form-group">
+                      <label for="stLastName">Фамилия обучаемого</label>
+                      <input type="text" id="stLastName" name="student_last_name" class="uppercase-input" placeholder="ИВАНОВ">
+                    </div>
+                    <div class="form-group">
+                      <label for="stFirstName">Имя обучаемого</label>
+                      <input type="text" id="stFirstName" name="student_first_name" class="uppercase-input" placeholder="АРТЕМ">
+                    </div>
+                    <div class="form-group">
+                      <label for="stMiddleName">Отчество</label>
+                      <input type="text" id="stMiddleName" name="student_middle_name" class="uppercase-input" placeholder="ИВАНОВИЧ">
+                    </div>
+                  </div>
+                  <div class="form-grid grid-3 mt-2">
+                    <div class="form-group">
+                      <label for="stBirthDate">Дата рождения</label>
+                      <input type="text" id="stBirthDate" name="student_birth_date" placeholder="10.02.2010">
+                    </div>
+                    <div class="form-group">
+                      <label for="stPassport">Серия и номер документа</label>
+                      <input type="text" id="stPassport" name="student_passport" placeholder="4515 987654">
+                    </div>
+                    <div class="form-group">
+                      <label for="stIssueDate">Дата выдачи</label>
+                      <input type="text" id="stIssueDate" name="student_doc_issue_date" placeholder="15.03.2024">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Кнопки управления формой -->
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="btnGenerate">
+                  <span class="btn-icon">⚡</span> Сформировать PDF
+                </button>
+                <button type="button" class="btn btn-secondary" id="btnDownload">
+                  <span class="btn-icon">📥</span> Скачать файл
+                </button>
+                <button type="button" class="btn btn-outline" id="btnPrint">
+                  <span class="btn-icon">🖨️</span> Печать
+                </button>
+                <button type="button" class="btn btn-ghost" id="btnReset">
+                  <span class="btn-icon">🔄</span> Очистить
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Правая колонка: Живой предпросмотр PDF -->
+          <div class="preview-column">
+            <div class="card preview-card">
+              <div class="card-header space-between">
+                <div class="header-left">
+                  <span class="card-icon">👁️</span>
+                  <h3>Предпросмотр справки</h3>
+                </div>
+                <div class="preview-controls">
+                  <span id="previewPageInfo" class="page-info">2 страницы • КНД 1151158</span>
+                </div>
+              </div>
+              <div class="preview-viewport">
+                <iframe id="pdfPreviewFrame" title="PDF Preview"></iframe>
+                <div id="previewPlaceholder" class="preview-placeholder">
+                  <div class="placeholder-icon">📄</div>
+                  <p>Нажмите <strong>«Сформировать PDF»</strong>, чтобы увидеть готовый документ</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ВКЛАДКА 2: ПАКЕТНАЯ ГЕНЕРАЦИЯ -->
+      <section id="tab-batch" class="tab-pane">
+        <div class="batch-container">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">📁</span>
+              <h3>Загрузка таблицы учеников (Excel / CSV)</h3>
+            </div>
+            <p class="section-desc">
+              Загрузите файл со списком клиентов. Приложение автоматически сгенерирует справку на каждого ученика с сохранением в папку <code>output/</code>.
+            </p>
+
+            <div class="drop-zone" id="batchDropZone">
+              <div class="drop-icon">📤</div>
+              <h4>Перетащите сюда файл Excel (.xlsx) или CSV</h4>
+              <p>или нажмите для выбора файла на компьютере</p>
+              <input type="file" id="batchFileInput" accept=".xlsx,.csv" class="hidden-file-input">
+            </div>
+
+            <div class="sample-downloads">
+              <span>Шаблоны таблиц для заполнения:</span>
+              <a href="/template_clients.xlsx" download class="btn-link">📥 Скачать образец Excel (.xlsx)</a>
+              <a href="/template_clients.csv" download class="btn-link">📥 Скачать образец CSV</a>
+            </div>
+          </div>
+
+          <!-- Таблица предпросмотра данных -->
+          <div class="card mt-3" id="batchPreviewCard" style="display: none;">
+            <div class="card-header space-between">
+              <h3>Найдено записей: <span id="batchCountBadge">0</span></h3>
+              <button class="btn btn-primary" id="btnStartBatch">
+                <span class="btn-icon">🚀</span> Запустить генерацию всех справок
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="batch-table" id="batchTable">
+                <thead>
+                  <tr>
+                    <th>№</th>
+                    <th>Справка №</th>
+                    <th>ФИО плательщика</th>
+                    <th>Дата рожд.</th>
+                    <th>Паспорт</th>
+                    <th>Сумма</th>
+                    <th>Год</th>
+                    <th>Статус</th>
+                  </tr>
+                </thead>
+                <tbody id="batchTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Результаты пакетной генерации -->
+          <div class="card mt-3" id="batchResultsCard" style="display: none;">
+            <div class="card-header">
+              <span class="card-icon">✅</span>
+              <h3>Результаты генерации</h3>
+            </div>
+            <div id="batchResultsList" class="results-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ВКЛАДКА 3: СТАТИЧЕСКИЕ ДАННЫЕ ОРГАНИЗАЦИИ -->
+      <section id="tab-settings" class="tab-pane">
+        <div class="settings-container">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">🏢</span>
+              <h3>Статические реквизиты организации / ИП</h3>
+            </div>
+            <p class="section-desc">
+              Эти данные являются <strong>статическими</strong> и сохраняются в конфигурации (<code>config.json</code>). Они автоматически подставляются во все генерируемые справки, чтобы их не нужно было вводить повторно.
+            </p>
+
+            <form id="orgSettingsForm">
+              <div class="form-grid grid-2">
+                <div class="form-group">
+                  <label for="orgInn">ИНН организации / ИП <span class="req">*</span></label>
+                  <input type="text" id="orgInn" name="org_inn" maxlength="12" placeholder="773610841807" required>
+                  <small>12 цифр для ИП, 10 цифр для юридического лица</small>
+                </div>
+                <div class="form-group">
+                  <label for="orgKpp">КПП (для юрлиц)</label>
+                  <input type="text" id="orgKpp" name="org_kpp" maxlength="9" placeholder="Пусто для ИП">
+                  <small>Оставляется пустым для индивидуальных предпринимателей</small>
+                </div>
+              </div>
+
+              <!-- Наименование организации (4 строки) -->
+              <div class="form-group mt-3">
+                <label>Данные образовательной организации / ИП (по строкам бланка):</label>
+                <div class="org-lines-inputs">
+                  <input type="text" id="orgLine1" class="uppercase-input mb-1" placeholder="ИНДИВИДУАЛЬНЫЙ ПРЕДПРИНИМАТЕЛЬ" maxlength="40">
+                  <input type="text" id="orgLine2" class="uppercase-input mb-1" placeholder="БУРЛАКОВ НИКИТА СЕРГЕЕВИЧ" maxlength="40">
+                  <input type="text" id="orgLine3" class="uppercase-input mb-1" placeholder="Строка 3 (если требуется)" maxlength="40">
+                  <input type="text" id="orgLine4" class="uppercase-input" placeholder="Строка 4 (если требуется)" maxlength="40">
+                </div>
+                <small>Текст автоматически центрируется в клетках каждой строки бланка</small>
+              </div>
+
+              <div class="form-grid grid-2 mt-3">
+                <div class="form-group">
+                  <label for="fullTimeSelect">Обучение проводилось по очной форме:</label>
+                  <select id="fullTimeSelect">
+                    <option value="0" selected>0 — нет (заочная, онлайн, курсы)</option>
+                    <option value="1">1 — да (очная форма обучения)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="defYear">Отчетный год по умолчанию:</label>
+                  <input type="number" id="defYear" value="2025">
+                </div>
+              </div>
+
+              <!-- Подтверждающее лицо -->
+              <div class="card subcard mt-3">
+                <div class="card-header">
+                  <span class="card-icon">✍️</span>
+                  <h4>Достоверность и полноту сведений подтверждаю:</h4>
+                </div>
+                <div class="form-grid grid-3">
+                  <div class="form-group">
+                    <label for="confirmLastName">Фамилия <span class="req">*</span></label>
+                    <input type="text" id="confirmLastName" class="uppercase-input" placeholder="БУРЛАКОВ" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="confirmFirstName">Имя <span class="req">*</span></label>
+                    <input type="text" id="confirmFirstName" class="uppercase-input" placeholder="НИКИТА" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="confirmMiddleName">Отчество</label>
+                    <input type="text" id="confirmMiddleName" class="uppercase-input" placeholder="СЕРГЕЕВИЧ">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Факсимиле подписи -->
+              <div class="card subcard mt-3">
+                <div class="card-header space-between">
+                  <h4>Факсимиле подписи</h4>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="enableSignature" checked> Вставлять подпись в документ
+                  </label>
+                </div>
+                <div class="signature-settings">
+                  <div class="signature-preview-box">
+                    <img id="sigPreviewImg" src="/assets/signature.png" alt="Подпись">
+                  </div>
+                  <div class="signature-actions">
+                    <label class="btn btn-outline file-btn">
+                      <span>📁 Загрузить свою подпись (PNG)</span>
+                      <input type="file" id="sigFileInput" accept="image/png,image/jpeg" class="hidden-file-input">
+                    </label>
+                    <button type="button" class="btn btn-ghost" id="btnDrawSig">
+                      <span>✏️ Нарисовать подпись</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Модальное окно рисования подписи -->
+                <div id="drawSigModal" class="modal hidden">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h3>Нарисуйте подпись мышкой или стилусом</h3>
+                      <button type="button" class="close-btn" id="btnCloseSigModal">&times;</button>
+                    </div>
+                    <div class="canvas-wrap">
+                      <canvas id="sigCanvas" width="400" height="150"></canvas>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-ghost" id="btnClearSig">Очистить</button>
+                      <button type="button" class="btn btn-primary" id="btnSaveSig">Использовать эту подпись</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <button type="button" class="btn btn-primary btn-lg" id="btnSaveSettings">
+                  💾 Сохранить статические настройки
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Подвал -->
+    <footer class="app-footer">
+      <p>SpravkaEduTax • Генератор справок КНД 1151158 по приказу ФНС России • Готово к размещению на GitHub</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
