@@ -54,17 +54,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadConfiguration();
   applyConfigToSettingsForm();
 
-  // Заполнение даты по умолчанию
-  const today = new Date();
-  const defDate = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
-  const docDateInput = document.getElementById("docDate");
-  if (docDateInput && !docDateInput.value) {
-    docDateInput.value = defDate;
-  }
-
-  // Заполнение тестовыми данными для мгновенного теста (Симонова)
-  fillDemoData();
-
   // Обработчик профиля
   document.getElementById("profileSelect").addEventListener("change", (e) => {
     switchProfile(e.target.value);
@@ -185,10 +174,10 @@ function applyConfigToSettingsForm() {
   document.getElementById("confirmLastName").value = currentConfig.confirm_last_name || "";
   document.getElementById("confirmFirstName").value = currentConfig.confirm_first_name || "";
   document.getElementById("confirmMiddleName").value = currentConfig.confirm_middle_name || "";
-  document.getElementById("docYear").value = currentConfig.default_year || 2025;
+  document.getElementById("docYear").placeholder = String(currentConfig.default_year || 2025);
 
   if (currentConfig.last_number) {
-    document.getElementById("docNumber").value = String(currentConfig.last_number + 1).padStart(3, '0');
+    document.getElementById("docNumber").placeholder = String(currentConfig.last_number + 1).padStart(3, '0');
   }
 }
 
@@ -302,20 +291,6 @@ function setupFormMasks() {
       }
     });
   }
-}
-
-// Заполнение демо-данными (как в примере 031 Симонова)
-function fillDemoData() {
-  document.getElementById("payerLastName").value = "СИМОНОВА";
-  document.getElementById("payerFirstName").value = "НИНА";
-  document.getElementById("payerMiddleName").value = "АНАТОЛЬЕВНА";
-  document.getElementById("payerBirthDate").value = "03.07.1958";
-  document.getElementById("docPassport").value = "4506 765502";
-  document.getElementById("docIssueDate").value = "13.01.2004";
-  document.getElementById("amountRub").value = "139 758";
-  document.getElementById("amountKop").value = "0";
-  document.getElementById("docNumber").value = "031";
-  document.getElementById("docDate").value = "07.06.2026";
 }
 
 // Генерация одиночной справки
