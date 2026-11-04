@@ -273,63 +273,63 @@ def generate_pdf(data: Union[SpravkaData, Dict[str, Any]], template_path: str = 
     c1 = canvas.Canvas(packet1, pagesize=A4)
 
     # ИНН в шапке (12 клеток)
-    _draw_cell_text(c1, spravka.org_inn, 198.42, 814.33, font_name)
+    _draw_cell_text(c1, spravka.org_inn, 198.42, 816.64, font_name)
 
     # Номер справки, номер корректировки, отчетный год
-    _draw_cell_text(c1, spravka.doc_number, 85.03, 699.03, font_name)
-    _draw_cell_text(c1, str(spravka.correction_num), 382.67, 699.03, font_name)
-    _draw_cell_text(c1, str(spravka.year), 524.40, 699.03, font_name)
+    _draw_cell_text(c1, spravka.doc_number, 85.03, 701.34, font_name)
+    _draw_cell_text(c1, str(spravka.correction_num), 382.67, 701.34, font_name)
+    _draw_cell_text(c1, str(spravka.year), 524.40, 701.34, font_name)
 
     # Наименование организации / ИП (до 4 строк)
-    org_ys = [655.13, 632.43, 609.73, 587.03]
+    org_ys = [657.44, 634.74, 612.04, 589.34]
     for idx, line in enumerate(spravka.org_name_lines[:4]):
         if line and line.strip():
             _draw_cell_text(c1, line.strip().upper(), 14.17, org_ys[idx], font_name)
 
     # Обучение по очной форме (0 - нет, 1 - да)
-    _draw_cell_text(c1, str(spravka.full_time), 240.94, 545.39, font_name)
+    _draw_cell_text(c1, str(spravka.full_time), 240.94, 547.74, font_name)
 
     # Данные налогоплательщика
-    _draw_cell_text(c1, spravka.payer_last_name.upper(), 70.86, 503.93, font_name)
-    _draw_cell_text(c1, spravka.payer_first_name.upper(), 70.86, 478.43, font_name)
-    _draw_cell_text(c1, spravka.payer_middle_name.upper(), 70.86, 452.83, font_name)
+    _draw_cell_text(c1, spravka.payer_last_name.upper(), 70.86, 506.24, font_name)
+    _draw_cell_text(c1, spravka.payer_first_name.upper(), 70.86, 480.74, font_name)
+    _draw_cell_text(c1, spravka.payer_middle_name.upper(), 70.86, 455.14, font_name)
     if spravka.payer_inn:
-        _draw_cell_text(c1, spravka.payer_inn, 70.86, 427.33, font_name)
+        _draw_cell_text(c1, spravka.payer_inn, 70.86, 429.64, font_name)
     if spravka.payer_birth_date:
-        _draw_date_cells(c1, spravka.payer_birth_date, 368.50, 427.33, font_name)
+        _draw_date_cells(c1, spravka.payer_birth_date, 368.50, 429.64, font_name)
 
     # Документ налогоплательщика
-    _draw_cell_text(c1, spravka.doc_code or '21', 113.38, 381.99, font_name)
+    _draw_cell_text(c1, spravka.doc_code or '21', 113.38, 384.34, font_name)
     doc_sn = f"{spravka.doc_series} {spravka.doc_num}".strip() if spravka.doc_series and spravka.doc_num else f"{spravka.doc_series}{spravka.doc_num}".strip()
     if doc_sn:
-        _draw_cell_text(c1, doc_sn, 297.63, 381.99, font_name)
+        _draw_cell_text(c1, doc_sn, 297.63, 384.34, font_name)
     if spravka.doc_issue_date:
-        _draw_date_cells(c1, spravka.doc_issue_date, 113.38, 356.49, font_name)
+        _draw_date_cells(c1, spravka.doc_issue_date, 113.38, 358.84, font_name)
 
     # Налогоплательщик и обучаемый являются одним лицом (0 / 1)
-    _draw_cell_text(c1, str(spravka.is_same_person), 269.29, 330.99, font_name)
+    _draw_cell_text(c1, str(spravka.is_same_person), 269.29, 333.34, font_name)
 
     # Сумма расходов
-    _draw_amount_cells(c1, spravka.amount_rub, spravka.amount_kop, 453.54, 302.23, font_name)
+    _draw_amount_cells(c1, spravka.amount_rub, spravka.amount_kop, 453.54, 304.54, font_name)
 
     # Подтверждающее лицо
-    _draw_cell_text(c1, spravka.confirm_last_name.upper(), 14.17, 242.33, font_name)
-    _draw_cell_text(c1, spravka.confirm_first_name.upper(), 14.17, 219.63, font_name)
-    _draw_cell_text(c1, spravka.confirm_middle_name.upper(), 14.17, 196.93, font_name)
+    _draw_cell_text(c1, spravka.confirm_last_name.upper(), 14.17, 244.64, font_name)
+    _draw_cell_text(c1, spravka.confirm_first_name.upper(), 14.17, 221.94, font_name)
+    _draw_cell_text(c1, spravka.confirm_middle_name.upper(), 14.17, 199.24, font_name)
 
     # Факсимиле подписи на странице 1
     if sig_file and os.path.exists(sig_file):
         try:
-            c1.drawImage(sig_file, 58.98, 151.47, width=80.09, height=24.23, mask='auto')
+            c1.drawImage(sig_file, 58.98, 153.78, width=80.09, height=24.23, mask='auto')
         except Exception as e:
             print(f"Предупреждение: не удалось вставить изображение подписи: {e}")
 
     # Дата справки (стр. 1 в клетки)
     if spravka.doc_date:
-        _draw_date_cells(c1, spravka.doc_date, 161.29, 156.53, font_name)
+        _draw_date_cells(c1, spravka.doc_date, 161.29, 158.84, font_name)
 
     # Количество страниц
-    _draw_cell_text(c1, f"{pages_count:03d}", 127.55, 126.73, font_name)
+    _draw_cell_text(c1, f"{pages_count:03d}", 127.55, 129.04, font_name)
 
     c1.showPage()
     c1.save()
@@ -343,7 +343,7 @@ def generate_pdf(data: Union[SpravkaData, Dict[str, Any]], template_path: str = 
         c2 = canvas.Canvas(packet2, pagesize=A4)
 
         # ИНН в шапке стр. 2
-        _draw_cell_text(c2, spravka.org_inn, 184.25, 814.33, font_name)
+        _draw_cell_text(c2, spravka.org_inn, 184.25, 816.64, font_name)
 
         # Данные обучаемого (если не указаны отдельно, берутся из плательщика)
         st_last = (spravka.student_last_name or spravka.payer_last_name).upper()
@@ -356,32 +356,32 @@ def generate_pdf(data: Union[SpravkaData, Dict[str, Any]], template_path: str = 
         st_num = spravka.student_doc_num or (spravka.doc_num if spravka.is_same_person else "")
         st_issue = spravka.student_doc_issue_date or (spravka.doc_issue_date if spravka.is_same_person else "")
 
-        _draw_cell_text(c2, st_last, 70.86, 723.63, font_name)
-        _draw_cell_text(c2, st_first, 70.86, 698.13, font_name)
-        _draw_cell_text(c2, st_mid, 70.86, 672.63, font_name)
+        _draw_cell_text(c2, st_last, 70.86, 725.94, font_name)
+        _draw_cell_text(c2, st_first, 70.86, 700.44, font_name)
+        _draw_cell_text(c2, st_mid, 70.86, 674.94, font_name)
         if st_inn:
-            _draw_cell_text(c2, st_inn, 70.86, 647.13, font_name)
+            _draw_cell_text(c2, st_inn, 70.86, 649.44, font_name)
         if st_birth:
-            _draw_date_cells(c2, st_birth, 368.50, 647.13, font_name)
+            _draw_date_cells(c2, st_birth, 368.50, 649.44, font_name)
 
-        _draw_cell_text(c2, st_code, 113.38, 598.93, font_name)
+        _draw_cell_text(c2, st_code, 113.38, 601.24, font_name)
         st_doc_sn = f"{st_series} {st_num}".strip() if st_series and st_num else f"{st_series}{st_num}".strip()
         if st_doc_sn:
-            _draw_cell_text(c2, st_doc_sn, 297.63, 598.93, font_name)
+            _draw_cell_text(c2, st_doc_sn, 297.63, 601.24, font_name)
         if st_issue:
-            _draw_date_cells(c2, st_issue, 113.38, 573.43, font_name)
+            _draw_date_cells(c2, st_issue, 113.38, 575.74, font_name)
 
         # Факсимиле подписи на странице 2
         if sig_file and os.path.exists(sig_file):
             try:
-                c2.drawImage(sig_file, 161.09, 13.34, width=62.09, height=18.79, mask='auto')
+                c2.drawImage(sig_file, 161.09, 15.65, width=62.09, height=18.79, mask='auto')
             except Exception:
                 pass
 
         # Дата внизу страницы 2 (простым текстом ДД.ММ.ГГГГ)
         if spravka.doc_date:
             c2.setFont(font_name, 11)
-            c2.drawString(378.00, 16.13, spravka.doc_date)
+            c2.drawString(378.00, 18.44, spravka.doc_date)
 
         c2.showPage()
         c2.save()

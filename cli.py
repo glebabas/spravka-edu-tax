@@ -78,9 +78,12 @@ def generate_single_from_args(args, cfg: Dict[str, Any]):
             data["doc_num"] = args.passport.strip()[4:]
 
     out_file = args.out
+    name_part = data["payer_last_name"] or "клиент"
+    default_filename = f"{data['doc_number']} {name_part} справка.pdf"
     if not out_file:
-        name_part = data["payer_last_name"] or "клиент"
-        out_file = os.path.join("output", f"{data['doc_number']} {name_part} справка.pdf")
+        out_file = os.path.join("output", default_filename)
+    elif os.path.isdir(out_file):
+        out_file = os.path.join(out_file, default_filename)
 
     print(f"Генерация справки № {data['doc_number']} для {data['payer_last_name']} {data['payer_first_name']}...")
     generate_pdf(data, output_path=out_file)
