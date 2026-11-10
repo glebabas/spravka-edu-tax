@@ -9,6 +9,7 @@ import json
 import os
 import socketserver
 import sys
+import time
 import urllib.parse
 import webbrowser
 from typing import Dict, Any
@@ -38,6 +39,8 @@ def save_config(cfg: Dict[str, Any]):
 
 
 class SpravkaHandler(http.server.SimpleHTTPRequestHandler):
+    timeout = 30  # Таймаут на чтение/запись сокета для защиты от зависаний (Slowloris)
+
     def __init__(self, *args, **kwargs):
         # Корневая директория для статики
         super().__init__(*args, directory=os.path.dirname(os.path.abspath(__file__)), **kwargs)
@@ -182,26 +185,51 @@ class SpravkaHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
 
-def run_server(port=PORT):
-    # Поиск доступного порта
-    for p in range(port, port + 20):
+class RobustThreadingServer(http.server.ThreadingHTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+    request_queue_size = 128
+
+
+def run_server(port=None, host=None):
+    if port is None:
+        port = int(os.environ.get("PORT", PORT))
+    if host is None:
+        host = os.environ.get("HOST", "127.0.0.1")
+
+    # Попытка запуска с SO_REUSEADDR и повтором при кратковременной занятости порта
+    server_address = (host, port)
+    httpd = None
+    max_retries = 5
+    for attempt in range(max_retries):
         try:
-            with socketserver.TCPServer(("", p), SpravkaHandler) as httpd:
-                url = f"http://localhost:{p}/web/index.html"
-                print("=" * 65)
-                print(f"🚀 Генератор справок об оплате образовательных услуг (КНД 1151158)")
-                print(f"   Сервер успешно запущен: {url}")
-                print(f"   Выходные файлы сохраняются в папку: {os.path.abspath(OUTPUT_DIR)}")
-                print(f"   Для остановки нажмите Ctrl + C")
-                print("=" * 65)
-                try:
-                    webbrowser.open(url)
-                except Exception:
-                    pass
-                httpd.serve_forever()
-                break
-        except OSError:
-            continue
+            httpd = RobustThreadingServer(server_address, SpravkaHandler)
+            break
+        except OSError as e:
+            if attempt < max_retries - 1:
+                print(f"Порт {port} на {host} временно недоступен ({e}), повтор через 1 сек...")
+                time.sleep(1)
+            else:
+                raise
+
+    display_host = "localhost" if host in ("127.0.0.1", "0.0.0.0", "") else host
+    url = f"http://{display_host}:{port}/web/index.html"
+    print("=" * 65)
+    print(f"🚀 Генератор справок об оплате образовательных услуг (КНД 1151158)")
+    print(f"   Сервер успешно запущен: {url} (интерфейс {host}:{port})")
+    print(f"   Режим многопоточности: ThreadingHTTPServer (активен)")
+    print(f"   Выходные файлы сохраняются в папку: {os.path.abspath(OUTPUT_DIR)}")
+    print(f"   Для остановки нажмите Ctrl + C")
+    print("=" * 65)
+
+    if os.environ.get("NO_BROWSER") != "1" and not os.environ.get("SSH_CONNECTION"):
+        try:
+            webbrowser.open(url)
+        except Exception:
+            pass
+
+    with httpd:
+        httpd.serve_forever()
 
 
 if __name__ == "__main__":
